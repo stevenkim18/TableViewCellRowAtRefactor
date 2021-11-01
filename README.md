@@ -31,3 +31,73 @@
       }
     }.disposed(by: disposeBag)
 ```
+
+## 리펙토링한 코드
+```swift
+class MultiSelectFilterDefaultTableViewCell: UITableViewCell { 
+    var filterButton: UIButton?
+
+    func setFilterButton(with item: String?) {
+        filterButton.setTitle(item, for: .normal)
+    }
+}
+class MultiSelectFilterDescriptionTableViewCell: UITableViewCell { 
+    var filterButton: UIButton?
+    var descriptionLabel: UILabel?
+
+    func setFilterButton(with item: String?) {
+        filterButton.setTitle(item, for: .normal)
+    }
+
+    func setDescriptionLabel(with description: String?) {
+        descriptionLabel.isHidden = description.isEmpty
+        descriptionLabel.text = description
+    }
+}
+class MultiSelectFilterDisableTableViewCell: UITableViewCell { }
+
+extension UITableViewCell {
+    static var className: String {
+        return String(describing: Self.self)
+    }
+    static var nibName: String {
+        return self.className
+    }
+    static var identifier: String {
+        return self.className
+    }
+}
+
+private func registerMultiSelectTableViewCells() {
+    tableView.register(UINib(nibName: MultiSelectFilterDefaultTableViewCell.nibName, 
+                             bundle: nil), 
+                       forCellReuseIdentifier: MultiSelectFilterDefaultTableViewCell.identifier)
+    tableView.register(UINib(nibName: MultiSelectFilterDescriptionTableViewCell.nibName, 
+                             bundle: nil), 
+                       forCellReuseIdentifier: MultiSelectFilterDescriptionTableViewCell.identifier)
+    tableView.register(UINib(nibName: MultiSelectFilterDisableTableViewCell.nibName, 
+                             bundle: nil), 
+                       forCellReuseIdentifier: MultiSelectFilterDisableTableViewCell.identifier)
+}
+     
+registerMultiSelectTableViewCells()
+
+list.bind(to: tableView.rx.items) { [weak self] (tableView, row, item) -> UITableViewCell in
+    let currentIndexPath = IndexPath(row: row, section: 0)
+    if self?.type == .Age,
+       !(0...2 ~= row) {
+        let cell = tableView.dequeueReusableCell(withIdentifier: MultiSelectFilterDescriptionTableViewCell.identifier, 
+                                                 for: currentIndexPath) as! MultiSelectFilterDescriptionTableViewCell
+        let description = self?.viewModel.getAgeDescription(row: row) ?? ""                                       
+	    cell.setFilterButton(with: item)
+	    cell.setDescriptionLabel(with: description)
+        return cell
+    }
+    else {
+        let cell = tableView.dequeueReusableCell(withIdentifier: MultiSelectFilterDefaultTableViewCell.identifier, 
+                                                 for: currentIndexPath) as! MultiSelectFilterDefaultTableViewCell
+        cell.setFilterButton(with: item)
+        return cell
+    }
+}.disposed(by: disposeBag)
+```

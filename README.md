@@ -123,7 +123,7 @@ extension UITableViewCell {
 
 tableView.register(UINib(nibName: MultiSelectFilterDefaultTableViewCell.nibName, 
                          bundle: nil), 
-	                 forCellReuseIdentifier: MultiSelectFilterDefaultTableViewCell.identifier)
+	           forCellReuseIdentifier: MultiSelectFilterDefaultTableViewCell.identifier)
 ```
 
 ### 여러개의 cell을 등록하는 함수를 한개의 함수로 묶어주었습니다.
